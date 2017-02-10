@@ -34,9 +34,11 @@ namespace FileHandlerActions
     {
         private const int MAX_UPLOAD_SIZE = 4 * 1024 * 1024;
         private HttpClient httpClient = new HttpClient();
-
         public static readonly HttpHelper Default = new HttpHelper();
 
+        /// <summary>
+        /// Write the contents of a file back via Microsoft Graph, into a folder and with a given filename.
+        /// </summary>
         public async Task<Microsoft.Graph.DriveItem> UploadFileFromStreamAsync(Stream fileStream, string baseUrl, Microsoft.Graph.ItemReference folder, string filename, string accessToken)
         {
             if (fileStream.Length > MAX_UPLOAD_SIZE)
@@ -48,6 +50,9 @@ namespace FileHandlerActions
             return await PutFileStreamToUrlAsync(fileStream, accessToken, requestUrl);
         }
 
+        /// <summary>
+        /// Update an existing item with the changes specified.
+        /// </summary>
         public async Task PatchItemMetadataAsync(object patchBody, string itemUrl, string accessToken)
         {
             var requestMessage = new HttpRequestMessage(HttpMethod.Post, itemUrl);
@@ -66,26 +71,9 @@ namespace FileHandlerActions
             responseMessage.EnsureSuccessStatusCode();
         }
 
-        public async Task<bool> UploadFileContentsFromStreamAsync(Stream fileStream, string itemUrl, string accessToken)
-        {
-            if (fileStream.Length > MAX_UPLOAD_SIZE)
-            {
-                throw new Exception("File stream is longer than allowed for simple PUT upload action.");
-            }
-
-            var item = await GetMetadataForUrlAsync<Microsoft.Graph.DriveItem>(itemUrl, accessToken);
-
-            var baseUrl = ActionHelpers.ParseBaseUrl(itemUrl);
-            var contentUrl = ActionHelpers.BuildApiUrl(baseUrl, item.ParentReference.DriveId, item.Id, "content");
-
-            item = await PutFileStreamToUrlAsync(fileStream, accessToken, contentUrl);
-            if (item != null && !string.IsNullOrEmpty(item.Id))
-                return true;
-
-            throw new Exception("Save failed.");
-
-        }
-
+        /// <summary>
+        /// Upload the contents of a file by putting the binary data to a URL.
+        /// </summary>
         private async Task<Microsoft.Graph.DriveItem> PutFileStreamToUrlAsync(Stream fileStream, string accessToken, string contentUrl)
         {
             var requestMessage = new HttpRequestMessage(HttpMethod.Put, contentUrl);
@@ -105,6 +93,9 @@ namespace FileHandlerActions
             return await ParseJsonFromResponseAsync<Microsoft.Graph.DriveItem>(responseMessage);
         }
 
+        /// <summary>
+        /// Convert the contents of an HttpResponseMessage into an object by using a JSON parser.
+        /// </summary>
         private async Task<T> ParseJsonFromResponseAsync<T>(HttpResponseMessage response)
         {
             if (response.Content.Headers.ContentType.MediaType.ToLower() != "application/json")
@@ -116,6 +107,9 @@ namespace FileHandlerActions
             return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(responseData);
         }
 
+        /// <summary>
+        /// Return a new object of type T by performing a GET on the URL and converting to an object.
+        /// </summary>
         public async Task<T> GetMetadataForUrlAsync<T>(string requestUri, string accessToken)
         {
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
@@ -131,17 +125,9 @@ namespace FileHandlerActions
             return await ParseJsonFromResponseAsync<T>(responseMessage);
         }
 
-        public async Task<FileData> GetStreamContentForItemUrlAsync(string itemUrl, string accessToken)
-        {
-            var item = await GetMetadataForUrlAsync<Microsoft.Graph.DriveItem>(itemUrl, accessToken);
-            var baseUrl = ActionHelpers.ParseBaseUrl(itemUrl);
-            var contentUrl = ActionHelpers.BuildApiUrl(baseUrl, item.ParentReference.DriveId, item.Id, "content");
-            var stream = await GetStreamContentForUrlAsync(contentUrl, accessToken);
-
-
-            return new FileData { ContentStream = stream, Filename = item.Name };
-        }
-
+        /// <summary>
+        /// Download the contents of a file via URL.
+        /// </summary>
         public async Task<Stream> GetStreamContentForUrlAsync(string requestUri, string accessToken)
         {
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
@@ -160,13 +146,6 @@ namespace FileHandlerActions
             ms.Seek(0, SeekOrigin.Begin);
             return ms;
         }
-
-        public async Task<string> GetSharingLinkAsync(string baseUrl)
-        {
-            throw new NotImplementedException();
-        }
-
-
     }
 
     public class FileData

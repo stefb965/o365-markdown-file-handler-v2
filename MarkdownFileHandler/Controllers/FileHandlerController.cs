@@ -37,6 +37,15 @@ namespace MarkdownFileHandler.Controllers
     [Authorize]
     public class FileHandlerController : Controller
     {
+        /// <summary>
+        /// Generate a read-write editor experience for a new file
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ActionResult> NewFile()
+        {
+            var input = GetActivationParameters();
+            return View("Edit", await GetFileHandlerModelV2Async(input));
+        }
 
         /// <summary>
         /// Generate a read-only preview of the file
@@ -58,12 +67,36 @@ namespace MarkdownFileHandler.Controllers
             return View(await GetFileHandlerModelV2Async(input));
         }
 
+        /// <summary>
+        /// Return the edit view for the file
+        /// </summary>
         public async Task<ActionResult> Edit()
         {
             var input = GetActivationParameters();
             return View(await GetFileHandlerModelV2Async(input));
         }
+        
+        /// <summary>
+        /// Custom action implemented for this file handler. Converts selected files
+        /// into archive.zip. 
+        /// </summary>
+        
+        public async Task<ActionResult> CompressFiles()
+        {
+            var input = GetActivationParameters();
 
+            var addToZipFile = new FileHandlerActions.AddToZip.AddToZipAction();
+            FileHandlerActions.AsyncJob job = new FileHandlerActions.AsyncJob(addToZipFile);
+            job.Status.OriginalParameters = input.ToDictionary();
+
+            var accessToken = await AuthHelper.GetUserAccessTokenSilentAsync(input.ResourceId);
+
+            HostingEnvironment.QueueBackgroundWorkItem(ct => job.Begin(input.ItemUrls(), accessToken));
+            return View("AsyncAction", new AsyncActionModel { JobIdentifier = job.Id, Status = job.Status, Title = "Add to ZIP" });
+        }
+
+        // Other public methods that are used by the various views to communicate callback
+        // to the file handler app.
         public async Task<ActionResult> Save()
         {
             var input = GetActivationParameters();
@@ -119,51 +152,11 @@ namespace MarkdownFileHandler.Controllers
             }
         }
 
-        /// <summary>
-        /// Generate a read-write editor experience for a new file
-        /// </summary>
-        /// <returns></returns>
-        public async Task<ActionResult> NewFile()
-        {
-            var input = GetActivationParameters();
-            return View("Edit", await GetFileHandlerModelV2Async(input));
-        }
-
-
-        public async Task<ActionResult> ConvertToPDF()
-        {
-            var input = GetActivationParameters();
-
-            var pdfConverter = new FileHandlerActions.PdfConversion();
-            FileHandlerActions.AsyncJob job = new FileHandlerActions.AsyncJob(pdfConverter);
-            job.Status.OriginalParameters = input.ToDictionary();
-
-            var accessToken = await AuthHelper.GetUserAccessTokenSilentAsync(input.ResourceId);
-
-            HostingEnvironment.QueueBackgroundWorkItem(ct => job.Begin(new string[] { input.SingleItemUrl() }, accessToken));
-            return View("AsyncAction", new AsyncActionModel { JobIdentifier = job.Id, Status = job.Status, Title = "Convert to PDF" });
-        }
-
         public ActionResult GetAsyncJobStatus(string identifier)
         {
             var job = FileHandlerActions.JobTracker.GetJob(identifier);
             return View("AsyncJobStatus", new AsyncActionModel { JobIdentifier = identifier, Status = job });
         }
-
-        public async Task<ActionResult> CompressFiles()
-        {
-            var input = GetActivationParameters();
-
-            var addToZipFile = new FileHandlerActions.AddToZip.AddToZipAction();
-            FileHandlerActions.AsyncJob job = new FileHandlerActions.AsyncJob(addToZipFile);
-            job.Status.OriginalParameters = input.ToDictionary();
-
-            var accessToken = await AuthHelper.GetUserAccessTokenSilentAsync(input.ResourceId);
-
-            HostingEnvironment.QueueBackgroundWorkItem(ct => job.Begin(input.ItemUrls(), accessToken));
-            return View("AsyncAction", new AsyncActionModel { JobIdentifier = job.Id, Status = job.Status, Title = "Add to ZIP" });
-        }
-
 
         /// <summary>
         /// Parse either the POST data or stored cookie data to retrieve the file information from
@@ -300,54 +293,6 @@ namespace MarkdownFileHandler.Controllers
 
             return MarkdownFileModel.GetWriteableModel(input, results.Filename, markdownSource);
         }
-
-
-        ///// <summary>
-        ///// Download the contents of the file from the server and return as a stream.
-        ///// </summary>
-        ///// <param name="input"></param>
-        ///// <param name="accessToken"></param>
-        ///// <returns></returns>
-        //private async Task<Stream> GetFileContentAsync(FileHandlerActivationParameters input, string accessToken)
-        //{
-        //    // Use the input.FileGet URL to download the contents of the file
-        //    var request = WebRequest.CreateHttp(input.FileGet);
-        //    request.Headers.Add("Authorization", "Bearer " + accessToken);
-        //    request.AllowAutoRedirect = false;
-
-        //    HttpWebResponse httpResponse = null;
-
-        //    try
-        //    {
-        //        var response = await request.GetResponseAsync();
-        //        httpResponse = response as HttpWebResponse;
-        //    }
-        //    catch (WebException ex)
-        //    {
-        //        httpResponse = ex.Response as HttpWebResponse;
-        //    }
-
-        //    if (httpResponse == null)
-        //    {
-        //        throw new WebException("Request was unsuccessful.");
-        //    }
-
-        //    if (httpResponse.StatusCode == HttpStatusCode.OK)
-        //    {
-        //        MemoryStream responseStream = new MemoryStream();
-        //        await httpResponse.GetResponseStream().CopyToAsync(responseStream);
-
-        //        // Reset the memory stream
-        //        responseStream.Seek(0, SeekOrigin.Begin);
-
-        //        return responseStream;
-        //    }
-        //    else
-        //    {
-        //        throw new WebException("Http response had invalid status code: " + httpResponse.StatusCode);
-        //    }
-        //}
-
         
     }
 }
