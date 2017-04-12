@@ -37,6 +37,8 @@ namespace MarkdownFileHandler.Controllers
     [Authorize]
     public class FileHandlerController : Controller
     {
+
+        #region Methods registered in file handler manifest
         /// <summary>
         /// Generate a read-write editor experience for a new file
         /// </summary>
@@ -66,21 +68,11 @@ namespace MarkdownFileHandler.Controllers
             var input = GetActivationParameters();
             return View(await GetFileHandlerModelV2Async(input));
         }
-
-        /// <summary>
-        /// Return the edit view for the file
-        /// </summary>
-        public async Task<ActionResult> Edit()
-        {
-            var input = GetActivationParameters();
-            return View(await GetFileHandlerModelV2Async(input));
-        }
         
         /// <summary>
         /// Custom action implemented for this file handler. Converts selected files
         /// into archive.zip. 
         /// </summary>
-        
         public async Task<ActionResult> CompressFiles()
         {
             var input = GetActivationParameters();
@@ -91,12 +83,25 @@ namespace MarkdownFileHandler.Controllers
 
             var accessToken = await AuthHelper.GetUserAccessTokenSilentAsync(input.ResourceId);
 
-            HostingEnvironment.QueueBackgroundWorkItem(ct => job.Begin(input.ItemUrls(), accessToken));
+            HostingEnvironment.QueueBackgroundWorkItem(ct => job.Begin(input.ItemUrls, accessToken));
             return View("AsyncAction", new AsyncActionModel { JobIdentifier = job.Id, Status = job.Status, Title = "Add to ZIP" });
         }
 
+        #endregion
+
         // Other public methods that are used by the various views to communicate callback
         // to the file handler app.
+
+        /// <summary>
+        /// Return the edit view for the file
+        /// </summary>
+        public async Task<ActionResult> Edit()
+        {
+            var input = GetActivationParameters();
+            return View(await GetFileHandlerModelV2Async(input));
+        }
+
+
         public async Task<ActionResult> Save()
         {
             var input = GetActivationParameters();
@@ -201,7 +206,7 @@ namespace MarkdownFileHandler.Controllers
             {
                 var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(input.FileContent));
 
-                var result = await HttpHelper.Default.UploadFileContentsFromStreamAsync(stream, input.SingleItemUrl(), accessToken);
+                var result = await HttpHelper.Default.UploadFileContentsFromStreamAsync(stream, input.ItemUrls.First(), accessToken);
                 return new SaveResults { Success = result };
             }
             catch (Exception ex)
@@ -254,7 +259,7 @@ namespace MarkdownFileHandler.Controllers
             // Upload the new file content
             try
             {
-                await HttpHelper.Default.PatchItemMetadataAsync(new { name = input.Filename }, input.SingleItemUrl(), accessToken);
+                await HttpHelper.Default.PatchItemMetadataAsync(new { name = input.Filename }, input.ItemUrls.First(), accessToken);
                 return new SaveResults { Success = true };
             }
             catch (Exception ex)
@@ -280,7 +285,10 @@ namespace MarkdownFileHandler.Controllers
             FileData results = null;
             try
             {
-                results = await HttpHelper.Default.GetStreamContentForItemUrlAsync(input.SingleItemUrl(), accessToken);
+                var sourceItem = await HttpHelper.Default.GetMetadataForUrlAsync<Microsoft.Graph.DriveItem>(input.ItemUrls.First(), accessToken);
+                results = new FileHandlerActions.FileData();
+                results.Filename = sourceItem.Name;
+                results.ContentStream = await HttpHelper.Default.GetStreamContentForUrlAsync((string)sourceItem.AdditionalData["@microsoft.graph.contentUrl"], accessToken);
             }
             catch (Exception ex)
             {
@@ -293,6 +301,16 @@ namespace MarkdownFileHandler.Controllers
 
             return MarkdownFileModel.GetWriteableModel(input, results.Filename, markdownSource);
         }
-        
+
+        public async Task<FileData> GetStreamContentForItemUrlAsync(string itemUrl, string accessToken)
+        {
+            var item = await HttpHelper.Default.GetMetadataForUrlAsync<Microsoft.Graph.DriveItem>(itemUrl, accessToken);
+            var baseUrl = ActionHelpers.ParseBaseUrl(itemUrl);
+            var contentUrl = ActionHelpers.BuildApiUrl(baseUrl, item.ParentReference.DriveId, item.Id, "content");
+            var stream = await HttpHelper.Default.GetStreamContentForUrlAsync(contentUrl, accessToken);
+
+            return new FileData { ContentStream = stream, Filename = item.Name };
+        }
+
     }
 }

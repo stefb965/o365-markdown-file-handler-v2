@@ -103,23 +103,21 @@ namespace MarkdownFileHandler.Models
         /// <summary>
         /// Helper property to retrieve item urls
         /// </summary>
-        public string[] ItemUrls()
+        public string[] ItemUrls
         {
-            if (!string.IsNullOrEmpty(Items))
-                return ConvertFromJsonArray<string>(this.Items).ToArray();
-            else
-                return new string[0];
+            get
+            {
+                if (!string.IsNullOrEmpty(Items))
+                {
+                    return ConvertFromJsonArray<string>(this.Items).ToArray();
+                }
+                else
+                {
+                    return new string[0];
+                }
+            }
         }
         
-
-        /// <summary>
-        /// Returns a single Microsoft Graph API URL that can be used to access an item in a single selection scenario.
-        /// </summary>
-        public string SingleItemUrl()
-        {
-            return ItemUrls().FirstOrDefault();
-        }
-
         /// <summary>
         /// A unique identifer for the logged in user who invoked the file handler.
         /// </summary>

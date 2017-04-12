@@ -86,6 +86,14 @@
       <HintPath>..\packages\Microsoft.Data.Services.Client.5.6.4\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Graph, Version=1.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Graph.1.2.1\lib\portable45-net45+win8+wpa81\Microsoft.Graph.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Graph.Core, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Graph.Core.1.3.0\lib\portable45-net45+win8+wpa81\Microsoft.Graph.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory, Version=3.10.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.3.10.305231913\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.dll</HintPath>
       <Private>True</Private>
@@ -114,6 +122,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IdentityModel" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Spatial, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Spatial.5.6.4\lib\net40\System.Spatial.dll</HintPath>
@@ -222,12 +232,20 @@
     <Compile Include="Models\HomeModel.cs" />
     <Compile Include="Models\MarkdownFile.cs" />
     <Compile Include="Models\SaveResults.cs" />
+    <Compile Include="Models\UserInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="Utils\ActionHelpers.cs" />
+    <Compile Include="Utils\AddToZipAction.cs" />
     <Compile Include="Utils\ApplicationDbContext.cs" />
+    <Compile Include="Utils\AsyncJob.cs" />
     <Compile Include="Utils\AzureStorage\AzureTableContext.cs" />
     <Compile Include="Utils\AzureStorage\AzureTokenCache.cs" />
+    <Compile Include="Utils\ConverterException.cs" />
     <Compile Include="Utils\CookieStorage.cs" />
+    <Compile Include="Utils\HttpHelper.cs" />
+    <Compile Include="Utils\JobTracker.cs" />
+    <Compile Include="Utils\PdfConversion.cs" />
     <Compile Include="Utils\SettingsHelper.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -287,12 +305,6 @@
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="packages.config" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\FileHandlerActions\FileHandlerActions.csproj">
-      <Project>{16b562dc-237d-4596-a219-9d775170a58e}</Project>
-      <Name>FileHandlerActions</Name>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
