@@ -1,7 +1,7 @@
 {
   "value": [
     {
-      "id": "49dde234-cd83-4cfe-23b4-be5437b01298",
+      "id": "2B133766-0D95-4D63-B457-E2261CDB7ACE",
       "type": "FileHandler",
       "properties": [
         {
@@ -10,55 +10,45 @@
         },
         {
           "key": "actions",
-          "value": "{\"actions\":[{\"title\":\"Convert to PDF\",\"url\":\"https://markdownfilehandler.azurewebsites.net/filehandler/convertToPdf\",\"platform\":[\"web\"],\"selection\":\"single\"},{\"title\":\"Add to ZIP file\",\"url\":\"https://markdownfilehandler.azurewebsites.net/filehandler/compressFiles\",\"platform\":[\"web\"],\"selection\":\"multiple\", \"allowFolders\": true }]}"
+          "value": "{\"actions\":[{\"title\":\"Convert to PDF - debug\",\"url\":\"https://localhost:44362/filehandler/convertToPdf\",\"platform\":[\"web\"],\"selection\":\"single\"},{\"title\":\"Add to ZIP file - debug\",\"url\":\"https://localhost:44362/filehandler/compressFiles\",\"platform\":[\"web\"],\"selection\":\"multiple\", \"allowFolders\": true }]}"
+        },
+        {
+        	"key": "version",
+        	"value": "2"
         }
       ]
     },
     {
-      "id": "49dde234-cd83-4cfe-23b4-be5437b01299",
+      "id": "B48A71A2-FABB-4571-9FD9-3E14F9200571",
       "type": "FileHandler",
       "properties": [
         {
           "key": "extension",
-          "value": "pdf"
-        },
-        {
-          "key": "openUrl",
-          "value": "https://markdownfilehandler.azurewebsites.net/filehandler/openpdf"
-        },
-        {
-          "key": "newFileUrl",
-          "value": "https://markdownfilehandler.azurewebsites.net/filehandler/newpdf"
-        }
-      ]
-    },
-    {
-      "id": "49dde234-cd83-4cfe-23b4-be5437b01241",
-      "type": "FileHandler",
-      "properties": [
-        {
-          "key": "extension",
-          "value": "mdown"
+          "value": "gfm;md"
         },
         {
           "key": "fileIcon",
-          "value": "https://markdownfilehandler.azurewebsites.net/images/markdown.png"
+          "value": "https://localhost:44362/images/markdown.png"
         },
         {
           "key": "openUrl",
-          "value": "https://markdownfilehandler.azurewebsites.net/filehandler/open"
+          "value": "https://localhost:44362/filehandler/open"
         },
         {
           "key": "previewUrl",
-          "value": "https://markdownfilehandler.azurewebsites.net/filehandler/preview"
+          "value": "https://localhost:44362/filehandler/preview"
         },
         {
           "key": "newFileUrl",
-          "value": "https://markdownfilehandler.azurewebsites.net/filehandler/newfile"
+          "value": "https://localhost:44362/filehandler/newfile"
         },
         {
           "key": "fileTypeName",
-          "value": "Markdown Text File"
+          "value": "Markdown Text Debug"
+        },
+        {
+        	"key": "version",
+        	"value": "2"
         }
       ]
     }
