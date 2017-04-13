@@ -288,7 +288,7 @@ namespace MarkdownFileHandler.Controllers
                 var sourceItem = await HttpHelper.Default.GetMetadataForUrlAsync<Microsoft.Graph.DriveItem>(input.ItemUrls.First(), accessToken);
                 results = new FileHandlerActions.FileData();
                 results.Filename = sourceItem.Name;
-                results.ContentStream = await HttpHelper.Default.GetStreamContentForUrlAsync((string)sourceItem.AdditionalData["@microsoft.graph.contentUrl"], accessToken);
+                results.ContentStream = await HttpHelper.Default.GetStreamContentForUrlAsync((string)sourceItem.AdditionalData["@microsoft.graph.downloadUrl"], accessToken);
             }
             catch (Exception ex)
             {
