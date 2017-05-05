@@ -52,12 +52,16 @@ namespace MarkdownFileHandler.Controllers
                     {
                         model.DisplayName = response.DisplayName;
                         model.OneDriveUrl = response.MySite;
+
+                        // Force the refresh so that this file handler gets enabled faster.
+                        await ForceFileHandlerRefresh.ForceFileHandlerRefreshAsync(response.MySite);
                     }
                     else
                     {
                         model.DisplayName = "Error getting data from Microsoft Graph.";
                     }
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     model.DisplayName = ex.ToString();
                 }

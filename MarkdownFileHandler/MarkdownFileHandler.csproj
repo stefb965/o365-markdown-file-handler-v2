@@ -257,6 +257,7 @@
     <Compile Include="Utils\AzureStorage\AzureTokenCache.cs" />
     <Compile Include="Utils\ConverterException.cs" />
     <Compile Include="Utils\CookieStorage.cs" />
+    <Compile Include="Utils\ForceFileHandlerRefresh.cs" />
     <Compile Include="Utils\HttpHelper.cs" />
     <Compile Include="Utils\JobTracker.cs" />
     <Compile Include="Utils\PdfConversion.cs" />
