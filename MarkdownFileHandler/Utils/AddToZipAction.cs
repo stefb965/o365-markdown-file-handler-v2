@@ -44,13 +44,20 @@ namespace FileHandlerActions.AddToZip
                 {
                     foreach(var itemUrl in sourceItemUrls)
                     {
-                        // Fetch the metadata and content for this item
-                        var sourceItem = await HttpHelper.Default.GetMetadataForUrlAsync<Microsoft.Graph.DriveItem>(itemUrl, accessToken);
-                        if (firstItem == null)
-                            firstItem = sourceItem;
-                        var result = await TryAddItemToArchiveAsync(archive, sourceItem, baseUrl, accessToken);
-                        if (!result)
-                            System.Diagnostics.Debug.WriteLine($"Error adding item {sourceItem.Name} to the zip archive.");
+                        try
+                        {
+                            // Fetch the metadata and content for this item
+                            var sourceItem = await HttpHelper.Default.GetMetadataForUrlAsync<Microsoft.Graph.DriveItem>(itemUrl, accessToken);
+                            if (firstItem == null)
+                                firstItem = sourceItem;
+                            var result = await TryAddItemToArchiveAsync(archive, sourceItem, baseUrl, accessToken);
+                            if (!result)
+                                System.Diagnostics.Debug.WriteLine($"Error adding item {sourceItem.Name} to the zip archive.");
+                        } catch (Exception ex)
+                        {
+                            // exceptions in retriving selected files should be handled better in production code
+                            System.Diagnostics.Debug.WriteLine($"Error adding the item at {itemUrl} into the archive: {ex.Message}");
+                        }
                     }
                 }
 
