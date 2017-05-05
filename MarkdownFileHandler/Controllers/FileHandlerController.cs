@@ -31,6 +31,7 @@ namespace MarkdownFileHandler.Controllers
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using System.Web;
     using System.Web.Hosting;
     using System.Web.Mvc;
 
@@ -45,7 +46,7 @@ namespace MarkdownFileHandler.Controllers
         /// <returns></returns>
         public async Task<ActionResult> NewFile()
         {
-            var input = GetActivationParameters();
+            var input = GetActivationParameters(Request);
             return View("Edit", await GetFileHandlerModelV2Async(input));
         }
 
@@ -55,7 +56,7 @@ namespace MarkdownFileHandler.Controllers
         /// <returns></returns>
         public async Task<ActionResult> Preview()
         {
-            var input = GetActivationParameters();
+            var input = GetActivationParameters(Request);
             return View(await GetFileHandlerModelV2Async(input));
         }
 
@@ -65,7 +66,7 @@ namespace MarkdownFileHandler.Controllers
         /// <returns></returns>
         public async Task<ActionResult> Open()
         {
-            var input = GetActivationParameters();
+            var input = GetActivationParameters(Request);
             return View(await GetFileHandlerModelV2Async(input));
         }
         
@@ -75,7 +76,7 @@ namespace MarkdownFileHandler.Controllers
         /// </summary>
         public async Task<ActionResult> CompressFiles()
         {
-            var input = GetActivationParameters();
+            var input = GetActivationParameters(Request);
 
             var addToZipFile = new FileHandlerActions.AddToZip.AddToZipAction();
             FileHandlerActions.AsyncJob job = new FileHandlerActions.AsyncJob(addToZipFile);
@@ -97,14 +98,14 @@ namespace MarkdownFileHandler.Controllers
         /// </summary>
         public async Task<ActionResult> Edit()
         {
-            var input = GetActivationParameters();
+            var input = GetActivationParameters(Request);
             return View(await GetFileHandlerModelV2Async(input));
         }
 
 
         public async Task<ActionResult> Save()
         {
-            var input = GetActivationParameters();
+            var input = GetActivationParameters(Request);
             if (input == null)
             {
                 return Json(new SaveResults() { Success = false, Error = "Missing activation parameters." });
@@ -122,7 +123,7 @@ namespace MarkdownFileHandler.Controllers
 
         public async Task<ActionResult> GetLink()
         {
-            var input = GetActivationParameters();
+            var input = GetActivationParameters(Request);
             if (input == null)
             {
                 return Json(new SaveResults() { Success = false, Error = "Missing activation parameters." });
@@ -140,7 +141,7 @@ namespace MarkdownFileHandler.Controllers
 
         public async Task<ActionResult> UpdateMetadata()
         {
-            var input = GetActivationParameters();
+            var input = GetActivationParameters(Request);
 
             if (input == null)
             {
@@ -168,24 +169,65 @@ namespace MarkdownFileHandler.Controllers
         /// the request.
         /// </summary>
         /// <returns></returns>
-        private FileHandlerActivationParameters GetActivationParameters()
+        public static FileHandlerActivationParameters GetActivationParameters(HttpRequestBase request)
         {
             FileHandlerActivationParameters activationParameters = null;
-            if (Request.Form != null && Request.Form.AllKeys.Count<string>() != 0)
+            if (IsFileHandlerActivationRequest(request, out activationParameters))
+            {
+                return activationParameters;
+            }
+            return null;
+        }
+
+        public static bool IsFileHandlerActivationRequest(HttpRequestBase request, out FileHandlerActivationParameters activationParameters)
+        {
+            activationParameters = null;
+            if (request.Form != null && request.Form.AllKeys.Any())
             {
                 // Get from current request's form data
-                activationParameters = new FileHandlerActivationParameters(Request.Form);
+                activationParameters = new FileHandlerActivationParameters(request.Form);
+                return true;
             }
             else
             {
                 // If form data does not exist, it must be because of the sign in redirection. 
                 // Read the cookie we saved before the redirection in RedirectToIdentityProvider callback in Startup.Auth.cs 
-                activationParameters = new FileHandlerActivationParameters(CookieStorage.Load());
-                
-                // Clear the cookie after using it
-                CookieStorage.Clear();
+                var persistedRequestData = CookieStorage.Load(request);
+                if (null != persistedRequestData)
+                {
+                    activationParameters = new FileHandlerActivationParameters(persistedRequestData);
+                    return true;
+                }
             }
-            return activationParameters;
+            return false;
+        }
+
+        public static bool IsFileHandlerActivationRequest(Microsoft.Owin.IOwinRequest request, out FileHandlerActivationParameters activationParameters)
+        {
+            activationParameters = null;
+
+            var formTask = request.ReadFormAsync();
+            formTask.RunSynchronously();
+            var formData = formTask.Result;
+
+            if (formData != null && formData.Any())
+            {
+                // Get from current request's form data
+                activationParameters = new FileHandlerActivationParameters(null);
+                return true;
+            }
+            else
+            {
+                // If form data does not exist, it must be because of the sign in redirection. 
+                // Read the cookie we saved before the redirection in RedirectToIdentityProvider callback in Startup.Auth.cs 
+                var persistedRequestData = CookieStorage.Load(request.Cookies);
+                if (null != persistedRequestData)
+                {
+                    activationParameters = new FileHandlerActivationParameters(persistedRequestData);
+                    return true;
+                }
+            }
+            return false;
         }
 
         private async Task<SaveResults> SaveChangesToFileContentAsync(FileHandlerActivationParameters input)

@@ -36,9 +36,25 @@ namespace MarkdownFileHandler
     {
         private const string CookieName = "FileHandlerActivationParameters";
 
-        public static NameValueCollection Load()
+
+        public static NameValueCollection Load(Microsoft.Owin.RequestCookieCollection cookies)
         {
-            HttpCookie cookie = HttpContext.Current.Request.Cookies[CookieName];
+            var cookie = cookies[CookieName];
+            if (cookie != null)
+            {
+                JavaScriptSerializer serializer = new JavaScriptSerializer();
+                serializer.RegisterConverters(new JavaScriptConverter[] { new NameValueCollectionConverter() });
+                return serializer.Deserialize<NameValueCollection>(cookie);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static NameValueCollection Load(HttpRequestBase request)
+        {
+            HttpCookie cookie = request.Cookies[CookieName];
 
             if (cookie != null)
             {
@@ -52,7 +68,7 @@ namespace MarkdownFileHandler
             }
         }
 
-        public static void Save(NameValueCollection collection)
+        public static void Save(NameValueCollection collection, HttpResponse response)
         {
             HttpCookie cookie = new HttpCookie(CookieName);
             JavaScriptSerializer serializer = new JavaScriptSerializer();
@@ -61,17 +77,17 @@ namespace MarkdownFileHandler
             cookie.Value = serializer.Serialize(collection);
             cookie.Expires = DateTime.Now.AddMinutes(10);
 
-            HttpContext.Current.Response.Cookies.Add(cookie);
+            response.Cookies.Add(cookie);
         }
 
-        public static void Clear()
+        public static void Clear(HttpRequestBase request, HttpResponseBase response)
         {
-            HttpCookie cookie = HttpContext.Current.Request.Cookies[CookieName];
+            HttpCookie cookie = request.Cookies[CookieName];
 
             if (cookie != null)
             {
                 cookie.Expires = DateTime.Now.AddDays(-1);
-                HttpContext.Current.Response.Cookies.Add(cookie);
+                response.Cookies.Add(cookie);
             }
         }
 

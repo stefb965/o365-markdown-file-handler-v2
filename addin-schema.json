@@ -1,54 +1,37 @@
 {
+  "odata.metadata": "https://graph.windows.net/myorganization/$metadata#Collection(Microsoft.DirectoryServices.AddIn)",
   "value": [
     {
-      "id": "2B133766-0D95-4D63-B457-E2261CDB7ACE",
       "type": "FileHandler",
       "properties": [
         {
-          "key": "extension",
-          "value": "*"
-        },
-        {
           "key": "actions",
-          "value": "{\"actions\":[{\"title\":\"Convert to PDF - debug\",\"url\":\"https://localhost:44362/filehandler/convertToPdf\",\"platform\":[\"web\"],\"selection\":\"single\"},{\"title\":\"Add to ZIP file - debug\",\"url\":\"https://localhost:44362/filehandler/compressFiles\",\"platform\":[\"web\"],\"selection\":\"multiple\", \"allowFolders\": true }]}"
+          "value": "[{\"type\":\"custom\",\"displayName\":\"Convert to PDF - debug\",\"url\":\"https://localhost:44362/filehandler/convertToPdf\",\"availableOn\":{\"file\":{\"extensions\":[\".docx\"]}}},{\"type\":\"custom\",\"displayName\":\"Add to ZIP file - debug\",\"url\":\"https://localhost:44362/filehandler/compressFiles\",\"availableOn\":{\"file\":{},\"folder\":{},\"allowMultiSelect\":true}}]"
         },
         {
-        	"key": "version",
-        	"value": "2"
+          "key": "version",
+          "value": "2"
         }
       ]
     },
     {
-      "id": "B48A71A2-FABB-4571-9FD9-3E14F9200571",
       "type": "FileHandler",
       "properties": [
         {
-          "key": "extension",
-          "value": "gfm;md"
+          "key": "version",
+          "value": "2"
         },
         {
-          "key": "fileIcon",
+          "key": "fileTypeDisplayName",
+          "value": "Markdown (debug)"
+        },
+        {
+          "key": "fileTypeIconUrl",
           "value": "https://localhost:44362/images/markdown.png"
         },
         {
-          "key": "openUrl",
-          "value": "https://localhost:44362/filehandler/open"
-        },
-        {
-          "key": "previewUrl",
-          "value": "https://localhost:44362/filehandler/preview"
-        },
-        {
-          "key": "newFileUrl",
-          "value": "https://localhost:44362/filehandler/newfile"
-        },
-        {
-          "key": "fileTypeName",
-          "value": "Markdown Text Debug"
-        },
-        {
-        	"key": "version",
-        	"value": "2"
+          "key": "actions",
+          "value": "[{\"type\":\"newFile\",\"url\":\"https://localhost:44362/filehandler/newFile\",\"availableOn\":{\"file\":{\"extensions\":[\".gfm\"]}}},{\"type\":\"open\",\"url\":\"https://localhost:44362/filehandler/open\",\"availableOn\":{\"file\":{\"extensions\":[\".gfm\"]}}},{\"type\":\"preview\",\"url\":\"https://localhost:44362/filehandler/preview\",\"availableOn\":{\"file\":{\"extensions\":[\".gfm\"]}}}]"
         }
       ]
     }

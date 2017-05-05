@@ -34,6 +34,8 @@ namespace MarkdownFileHandler
     using Owin;
     using Microsoft.IdentityModel.Clients.ActiveDirectory;
     using MarkdownFileHandler.Utils;
+    using Models;
+    using Controllers;
 
     public partial class Startup
     {
@@ -55,12 +57,17 @@ namespace MarkdownFileHandler
                     PostLogoutRedirectUri = "/",
                     TokenValidationParameters = new System.IdentityModel.Tokens.TokenValidationParameters
                     {
-                        // instead of using the default validation (validating against a single issuer value, as we do in line of business apps), 
-                        // we inject our own multitenant validation logic
-                        ValidateIssuer = false,
-                        // If the app needs access to the entire organization, then add the logic
-                        // of validating the Issuer here.
-                        // IssuerValidator
+                        // instead of using the default validation (validating against a single issuer value, as we do in line of business apps (single tenant apps)), 
+                        // we turn off validation
+                        //
+                        // NOTE:
+                        // * In a multitenant scenario you can never validate against a fixed issuer string, as every tenant will send a different one.
+                        // * If you don’t care about validating tenants, as is the case for apps giving access to 1st party resources, you just turn off validation.
+                        // * If you do care about validating tenants, think of the case in which your app sells access to premium content and you want to limit access only to the tenant that paid a fee, 
+                        //       you still need to turn off the default validation but you do need to add logic that compares the incoming issuer to a list of tenants that paid you, 
+                        //       and block access if that’s not the case.
+                        // * Refer to the following sample for a custom validation logic: https://github.com/AzureADSamples/WebApp-WebAPI-MultiTenant-OpenIdConnect-DotNet
+                        ValidateIssuer = false
                     },
                     Notifications = new OpenIdConnectAuthenticationNotifications()
                     {
@@ -104,14 +111,21 @@ namespace MarkdownFileHandler
                             context.ProtocolMessage.RedirectUri = appBaseUrl + "/";
                             context.ProtocolMessage.PostLogoutRedirectUri = appBaseUrl;
 
-                            // Save the form in the cookie to prevent it from getting lost in the login redirect
-                            CookieStorage.Save(HttpContext.Current.Request.Form);
+                            FileHandlerActivationParameters fileHandlerActivation;
+                            if (FileHandlerController.IsFileHandlerActivationRequest(new HttpRequestWrapper(HttpContext.Current.Request), out fileHandlerActivation))
+                            {
+                                // Add LoginHint and DomainHint if the request includes a form handler post
+                                context.ProtocolMessage.LoginHint = fileHandlerActivation.UserId;
+                                context.ProtocolMessage.DomainHint = "organizations";
+
+                                // Save the form in the cookie to prevent it from getting lost in the login redirect
+                                CookieStorage.Save(HttpContext.Current.Request.Form, HttpContext.Current.Response);
+                            }
 
                             return Task.FromResult(0);
                         }
                     }
                 });
         }
-        
     }
 }
