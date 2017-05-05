@@ -122,6 +122,13 @@ namespace MarkdownFileHandler
                                 CookieStorage.Save(HttpContext.Current.Request.Form, HttpContext.Current.Response);
                             }
 
+                            // Allow us to change the prompt in consent mode if the challenge properties specify a prompt type
+                            var challengeProperties = context.OwinContext?.Authentication?.AuthenticationResponseChallenge?.Properties;
+                            if (null != challengeProperties && challengeProperties.Dictionary.ContainsKey("prompt"))
+                            {
+                                context.ProtocolMessage.Prompt = challengeProperties.Dictionary["prompt"];
+                            }
+
                             return Task.FromResult(0);
                         }
                     }

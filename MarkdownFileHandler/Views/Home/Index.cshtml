@@ -18,10 +18,22 @@
     </div>
     @if (!string.IsNullOrEmpty(Model.SignInName))
     {
-    <div class="col-md-4">
-        <h2>Signed In</h2>
-        <p>You are signed in. Your signin name is @Model.SignInName and your display name is @Model.DisplayName .</p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-    </div>
+        <div class="col-md-4">
+            <h2>Signed In</h2>
+            <p>You are signed in. Your signin name is @Model.SignInName and your display name is @Model.DisplayName .</p>
+            <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
+        </div>
     }
+    else
+    {
+        <div class="col-md-4">
+            <h2>User Sign-In</h2>
+            <p>@Html.ActionLink("Sign in as a user", "SignIn", "Account") to enable the file handler extension on your account.</p>
+      </div>
+    }
+
+    <div class="col-md-4">
+        <h2>Admin Sign-In</h2>
+        <p>@Html.ActionLink("Sign in as an admin", "SignInAdmin", "Account") to enable the file handler extension for your entire organization.</p>
+    </div>
 </div>

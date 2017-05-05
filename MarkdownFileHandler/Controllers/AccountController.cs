@@ -43,6 +43,19 @@ namespace MarkdownFileHandler.Controllers
             }
         }
 
+        public void SignInAdmin()
+        {
+            // Send an OpenID Connect sign-in request.
+            if (!Request.IsAuthenticated)
+            {
+                var authprops = new AuthenticationProperties { RedirectUri = "/" };
+                authprops.Dictionary["prompt"] = "admin_consent";
+                HttpContext.GetOwinContext().Authentication.Challenge(authprops,
+                    OpenIdConnectAuthenticationDefaults.AuthenticationType);
+                // add &prompt=admin_consent
+            }
+        }
+
         public void SignOut()
         {
             string callbackUrl = Url.Action("SignOutCallback", "Account", routeValues: null, protocol: Request.Url.Scheme);
