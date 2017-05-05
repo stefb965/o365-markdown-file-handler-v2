@@ -88,6 +88,21 @@ namespace MarkdownFileHandler.Controllers
             return View("AsyncAction", new AsyncActionModel { JobIdentifier = job.Id, Status = job.Status, Title = "Add to ZIP" });
         }
 
+        protected override void OnAuthorization(AuthorizationContext filterContext)
+        {
+            base.OnAuthorization(filterContext);
+
+            // Ensure that the user context for a file handler matches the signed-in user context
+            var input = GetActivationParameters(filterContext.HttpContext.Request);
+            if (input != null)
+            {
+                if (input.UserId != User.Identity.Name)
+                {
+                    filterContext.Result = new HttpUnauthorizedResult();
+                }
+            }
+        }
+
         #endregion
 
         // Other public methods that are used by the various views to communicate callback
@@ -99,6 +114,7 @@ namespace MarkdownFileHandler.Controllers
         public async Task<ActionResult> Edit()
         {
             var input = GetActivationParameters(Request);
+
             return View(await GetFileHandlerModelV2Async(input));
         }
 
