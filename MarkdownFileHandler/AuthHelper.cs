@@ -38,13 +38,12 @@ namespace MarkdownFileHandler
         /// </summary>
         /// <param name="resource"></param>
         /// <returns></returns>
-        public static async Task<string> GetUserAccessTokenSilentAsync(string resource)
+        public static async Task<string> GetUserAccessTokenSilentAsync(string resource, bool allowInteractiveLogin = true)
         {
             string signInUserId = GetUserId();
             if (!string.IsNullOrEmpty(signInUserId))
             {
                 var authContext = new AuthenticationContext(SettingsHelper.Authority, false, new AzureTableTokenCache(signInUserId));
-
                 var clientCredential = new ClientCredential(SettingsHelper.ClientId, SettingsHelper.AppKey);
 
                 try

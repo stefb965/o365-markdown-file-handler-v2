@@ -26,6 +26,7 @@
 namespace FileHandlerActions
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Net.Http;
     using System.Threading.Tasks;
@@ -67,28 +68,45 @@ namespace FileHandlerActions
                  return true;
  
              throw new Exception("Save failed.");
- 
          }
 
-/// <summary>
-/// Update an existing item with the changes specified.
-/// </summary>
-public async Task PatchItemMetadataAsync(object patchBody, string itemUrl, string accessToken)
+        /// <summary>
+        /// Update an existing item with the changes specified in patchBody.
+        /// </summary>
+        public async Task<T> PatchAsync<T>(object patchBody, string itemUrl, string accessToken) where T : class
+        {
+            var forcePatch = new Dictionary<string, string>();
+            forcePatch["X-HTTP-Method"] = "PATCH";
+
+            return await PostAsync<T>(patchBody, itemUrl, accessToken, forcePatch);
+        }
+
+        /// <summary>
+        /// Post an object to a URL and return the response converted back into an object.
+        /// </summary>
+        public async Task<T> PostAsync<T>(object body, string itemUrl, string accessToken, Dictionary<string,string> additionalHeaders = null) where T : class
         {
             var requestMessage = new HttpRequestMessage(HttpMethod.Post, itemUrl);
-            requestMessage.Headers.TryAddWithoutValidation("X-HTTP-Method", "PATCH");
-
+            if (additionalHeaders != null)
+            {
+                foreach(var header in additionalHeaders)
+                {
+                    requestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                }
+            }
             if (!string.IsNullOrEmpty(accessToken))
             {
                 requestMessage.Headers.TryAddWithoutValidation("Authorization", "Bearer " + accessToken);
             }
 
-            var contentText = Newtonsoft.Json.JsonConvert.SerializeObject(patchBody);
+            var contentText = Newtonsoft.Json.JsonConvert.SerializeObject(body);
             var content = new StringContent(contentText, System.Text.Encoding.UTF8, "application/json");
             requestMessage.Content = content;
 
             var responseMessage = await httpClient.SendAsync(requestMessage);
             responseMessage.EnsureSuccessStatusCode();
+
+            return await ParseJsonFromResponseAsync<T>(responseMessage);
         }
 
         /// <summary>
@@ -130,7 +148,7 @@ public async Task PatchItemMetadataAsync(object patchBody, string itemUrl, strin
         /// <summary>
         /// Return a new object of type T by performing a GET on the URL and converting to an object.
         /// </summary>
-        public async Task<T> GetMetadataForUrlAsync<T>(string requestUri, string accessToken)
+        public async Task<T> GetMetadataForUrlAsync<T>(string requestUri, string accessToken) where T : class
         {
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
 

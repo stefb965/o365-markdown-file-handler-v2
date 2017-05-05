@@ -48,9 +48,9 @@ namespace MarkdownFileHandler.Controllers
             // Send an OpenID Connect sign-in request.
             if (!Request.IsAuthenticated)
             {
-                var authprops = new AuthenticationProperties { RedirectUri = "/" };
-                authprops.Dictionary["prompt"] = "admin_consent";
-                HttpContext.GetOwinContext().Authentication.Challenge(authprops,
+                var authProps = new AuthenticationProperties { RedirectUri = "/" };
+                authProps.Dictionary["prompt"] = "admin_consent";
+                HttpContext.GetOwinContext().Authentication.Challenge(authProps,
                     OpenIdConnectAuthenticationDefaults.AuthenticationType);
                 // add &prompt=admin_consent
             }

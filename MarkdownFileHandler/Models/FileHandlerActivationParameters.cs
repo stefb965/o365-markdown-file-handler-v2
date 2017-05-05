@@ -34,6 +34,12 @@ namespace MarkdownFileHandler.Models
     public class FileHandlerActivationParameters
     {
         private NameValueCollection sourceParameters;
+
+        internal FileHandlerActivationParameters()
+        {
+
+        }
+
         public FileHandlerActivationParameters(NameValueCollection collection)
         {
             sourceParameters = collection;
