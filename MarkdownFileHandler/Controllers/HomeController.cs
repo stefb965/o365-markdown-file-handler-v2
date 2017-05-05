@@ -40,11 +40,18 @@ namespace MarkdownFileHandler.Controllers
                 try
                 {
                     var accessToken = await AuthHelper.GetUserAccessTokenSilentAsync(SettingsHelper.AADGraphResourceId);
-                    // Make an API request to get display name
+
+                    if (accessToken == null)
+                    {
+                        // Redirect to get new tokens
+                        return Redirect("/Account/SignIn?force=1");
+                    }
+                    // Make an API request to get display name and MySite URL
                     var response = await FileHandlerActions.Directory.UserInfo.GetUserInfoAsync(SettingsHelper.AADGraphResourceId, model.SignInName, accessToken);
                     if (null != response)
                     {
                         model.DisplayName = response.DisplayName;
+                        model.OneDriveUrl = response.MySite;
                     }
                     else
                     {

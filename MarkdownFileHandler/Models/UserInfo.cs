@@ -34,23 +34,18 @@ namespace FileHandlerActions.Directory
         /// </summary>
         /// <param name="sourceFileUrl"></param>
         /// <returns></returns>
-        public static async Task<UserInfo> GetUserInfoAsync(string graphUrl, string userObjectId, string accessToken)
+        public static async Task<UserInfo> GetUserInfoAsync(string graphBaseUrl, string userObjectId, string accessToken)
         {
             if (!string.IsNullOrEmpty(userObjectId))
             {
-                return await HttpHelper.Default.GetMetadataForUrlAsync<UserInfo>($"{graphUrl}/v1.0/users/{userObjectId}", accessToken);
+                return await HttpHelper.Default.GetMetadataForUrlAsync<UserInfo>($"{graphBaseUrl}/v1.0/users/{userObjectId}?$select=displayName,mysite", accessToken);
             }
 
             return null;
         }
 
         public string DisplayName { get; set; }
-        public string GivenName { get; set; }
-        public string JobTitle { get; set; }
-        public string Mail { get; set; }
-        public string MobilePhone { get; set; }
-        public string OfficeLocation { get; set; }
-        public string Surname { get; set; }
-        public string UserPrincipalName { get; set; }
+        public string MySite { get; set; }
+
     }
 }

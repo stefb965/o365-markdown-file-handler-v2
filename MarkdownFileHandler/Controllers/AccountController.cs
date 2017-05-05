@@ -33,10 +33,12 @@ namespace MarkdownFileHandler.Controllers
 
     public class AccountController : Controller
     {
-        public void SignIn()
+        public void SignIn(string force)
         {
             // Send an OpenID Connect sign-in request.
-            if (!Request.IsAuthenticated)
+            bool forceLogin = false;
+            if (!string.IsNullOrEmpty(force) && force == "1") forceLogin = true;
+            if (forceLogin || !Request.IsAuthenticated)
             {
                 HttpContext.GetOwinContext().Authentication.Challenge(new AuthenticationProperties { RedirectUri = "/" },
                     OpenIdConnectAuthenticationDefaults.AuthenticationType);

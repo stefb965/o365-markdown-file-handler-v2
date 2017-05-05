@@ -1,0 +1,39 @@
+{
+  "odata.metadata": "https://graph.windows.net/myorganization/$metadata#Collection(Microsoft.DirectoryServices.AddIn)",
+  "value": [
+    {
+      "type": "FileHandler",
+      "properties": [
+        {
+          "key": "actions",
+          "value": "[{\"type\":\"custom\",\"displayName\":\"Convert to PDF - debug\",\"url\":\"https://markdownfilehandler.azurewebsites.net/filehandler/convertToPdf\",\"availableOn\":{\"file\":{\"extensions\":[\".docx\"]}}},{\"type\":\"custom\",\"displayName\":\"Add to ZIP file - debug\",\"url\":\"https://markdownfilehandler.azurewebsites.net/filehandler/compressFiles\",\"availableOn\":{\"file\":{},\"folder\":{},\"allowMultiSelect\":true}}]"
+        },
+        {
+          "key": "version",
+          "value": "2"
+        }
+      ]
+    },
+    {
+      "type": "FileHandler",
+      "properties": [
+        {
+          "key": "version",
+          "value": "2"
+        },
+        {
+          "key": "fileTypeDisplayName",
+          "value": "Markdown Document"
+        },
+        {
+          "key": "fileTypeIconUrl",
+          "value": "https://markdownfilehandler.azurewebsites.net/images/markdown.png"
+        },
+        {
+          "key": "actions",
+          "value": "[{\"type\":\"newFile\",\"url\":\"https://markdownfilehandler.azurewebsites.net/filehandler/newFile\",\"availableOn\":{\"file\":{\"extensions\":[\".md\"]}}},{\"type\":\"open\",\"url\":\"https://markdownfilehandler.azurewebsites.net/filehandler/open\",\"availableOn\":{\"file\":{\"extensions\":[\".md\", \".mdown\", \".gfm\"]}}},{\"type\":\"preview\",\"url\":\"https://markdownfilehandler.azurewebsites.net/filehandler/preview\",\"availableOn\":{\"file\":{\"extensions\":[\".md\", \".mdown\", \".gfm\"]}}}]"
+        }
+      ]
+    }
+  ]
+}
